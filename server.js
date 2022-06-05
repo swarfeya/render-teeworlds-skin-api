@@ -446,7 +446,7 @@ async function renderSkin(skin, color_body, color_feet) {
 let express = require('express')
 let app = express();
 
-app.get("/rendered2/:skin/:color_body/:color_feet", async (req, res) => {
+app.get("/render/:skin/:color_body/:color_feet", async (req, res) => {
 	console.log(req.params)
 	let skin = req.params.skin;
 	let color_body = isNaN(parseInt(req.params.color_body)) ? -1 : parseInt(req.params.color_body) & 0xffffffff;
@@ -459,7 +459,7 @@ app.get("/rendered2/:skin/:color_body/:color_feet", async (req, res) => {
 
 	res.send(rendered);
 })
-app.get("/rendered2/:skin", async (req, res) => {
+app.get("/render/:skin", async (req, res) => {
 	console.log(req.params)
 	let skin = req.params.skin;
 	// let color_body = isNaN(parseInt(req.params.color_body)) ? -1 : parseInt(req.params.color_body) & 0xffffffff;
