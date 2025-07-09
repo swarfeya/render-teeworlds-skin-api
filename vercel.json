@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs16.x"
+    }
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "/server.js" }
+  ]
+}
