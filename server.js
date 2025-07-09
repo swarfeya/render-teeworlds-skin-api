@@ -481,36 +481,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 
-app.post("/api/*", (req, res) => {
-  console.log("hello")
-  console.log(req.body)
-  request.post("https://discord.com" + req.url, {
-    json: req.body,
-    body: req.body
-  }, (err, response, body) => {
-		console.log(body)
-		res.send(body);		
-	})
-})
-
-// app.post("/api/*", (req, res) => {
-//   console.log("abc")
-// 	console.log("???", req)
-// 	if (req.body) {
-// 	  console.log(req)
-// 	  request.post('https://discord.com' + req.url, {
-// 		body: req.body,
-// 		json: true,
-		
-// 		headers: {
-// 			'Content-Type': 'application/json'
-// 		}
-// 	}, (err, response, body) => {
-// 		console.log(body)
-// 		res.send(body);		
-// 	})
-// 	}
-//   })
 
 
 
