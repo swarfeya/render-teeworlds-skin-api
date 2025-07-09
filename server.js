@@ -1,4 +1,6 @@
-let Jimp = require('jimp');
+import {Jimp, JimpMime} from 'jimp';
+import express from 'express';
+// import * as bodyParser from 'body-parser'
 class Color {
 	constructor(r, g, b, a=255) {
 		this.r = r
@@ -225,8 +227,10 @@ const COLOR_MODE = {
 } */
 
 function drawImage(img, x, y, w, h, dx, dy, dw, dh) {
-	
-	return img.clone().crop(x, y, w, h).resize(dw, dh);
+	return img
+		.clone()
+		.crop({x, y, w, h})
+		.resize({w: dw, h: dh});
 	/**(skin,192,64,64,32,8,32,64,30)
 (skin,96,0,96,96,16,0,64,64); 
 (skin,192,64,64,32,24,32,64,30
@@ -340,114 +344,129 @@ function reorderBody(bitmap) {
 }
 
 
-async function renderSkin(skin, color_body, color_feet) {
-	return new Promise((resolve, reject) => {
-	// if (!require('fs').readdirSync('./skins/06/').includes(skin + ".png"))
-	// 	skin = 'default';
-	if (color_body !== -1)
-		color_body = colorConvert(color_body, "code")
-	// color_feet = HSLToRGB(codeFormat(color_body)[0], codeFormat(color_body)[1], codeFormat(color_body)[2])
-	if (color_feet !== -1)
-		color_feet = colorConvert(color_feet, "code")
-	// Jimp.read("https://ddnet.org/skins/skin/community/" + skin + ".png")
-	// Jimp.
-	Jimp.read("https://ddnet.org/skins/skin/community/" + skin + ".png", async (err, skin) => {
-		if (err) {
-			// return console.error(err);
-			skin = await Jimp.read("./skins/default.png");
+async function renderSkin(skinname, color_body, color_feet) {
+	return new Promise(async (resolve, reject) => {
+		console.log("!2")
+		
+		// if (!require('fs').readdirSync('./skins/06/').includes(skin + ".png"))
+		// 	skin = 'default';
+		if (color_body !== -1)
+			color_body = colorConvert(color_body, "code")
+		// color_feet = HSLToRGB(codeFormat(color_body)[0], codeFormat(color_body)[1], codeFormat(color_body)[2])
+		if (color_feet !== -1)
+			color_feet = colorConvert(color_feet, "code")
+		// Jimp.read("https://ddnet.org/skins/skin/community/" + skin + ".png")
+		// Jimp.
+		console.log("!3")
+		// Jimp.read()
+		try {
+
+			let skin = await Jimp.read("https://ddnet.org/skins/skin/community/" + skinname + ".png");//, async (err, skin) => {
+			console.log("!4")
+			// if (err) {
+			// 	console.log("!5")
+			// 	// return console.error(err);
+			// 	skin = await Jimp.read("./skins/default.png");
+			// }
+			// skin.clone().crop().resize({w})
+			console.log("!6")
+			let shadow_feet = drawImage(skin, 192, 64, 64, 32, 8, 32, 64*2, 30*2); //back feet shadow
+			let shadow_body = drawImage(skin, 96, 0, 96, 96, 16, 0, 64*2, 64*2); //body shadow
+			let shadow_front_feet = drawImage(skin, 192, 64, 64, 32, 24, 32, 64*2, 30*2); //front feet shadow
+			let back_feet = drawImage(skin, 192, 32, 64, 32, 8, 32, 64*2, 30*2); //back feet
+			let body = drawImage(skin, 0, 0, 96, 96, 16, 0, 64*2, 64*2)
+			// .color([
+				// { apply: 'hue', params: [0] },
+				// { apply: 'saturate', params: [0] },
+				// { apply: 'lighten', params: [20] },
+				// { apply: '', params: [0] }
+			// ]); //body
+			
+			let front_feet = drawImage(skin, 192, 32, 64, 32, 24, 32, 64*2, 30*2); //front feet
+			let eye = drawImage(skin, 64, 96, 32, 32, 39, 18, 26*2, 26*2); //left eye
+
+			// let shadow_feet = img.clone().cropQuiet(192, 64, 64, 32)
+			// let shadow_body = img.clone().cropQuiet(96, 0, 96, 96); //body shadow
+			// let shadow_front_feet = img.clone().cropQuiet(192, 64, 64, 32); //front feet shadow
+			// let back_feet = img.clone().cropQuiet(192, 32, 64, 32); //back feet
+			// let body = img.clone().cropQuiet(0, 0, 96, 96); //body
+			// let front_feet = img.clone().cropQuiet(192, 32, 64, 32); //front feet
+			// let eye = img.clone().cropQuiet(64, 96, 32, 32); //left eye
+			
+			let newImage = new Jimp({width: 192, height: 128});
+		// newImage.bitmap.data.forEach(a => {
+				// console.log(a)
+				// a += 57;
+			// })
+			if (color_body !== -1) {
+				body.bitmap.data = setColor(color_body, "grayscale", body.bitmap.data) 
+				body.bitmap.data = reorderBody(body.bitmap.data)
+				body.bitmap.data = setColor(color_body, "default", body.bitmap.data) 
+
+				eye.bitmap.data = setColor(color_body, "grayscale", eye.bitmap.data) 
+		//		eye.bitmap.data = reorderBody(eye.bitmap.data)
+				eye.bitmap.data = setColor(color_body, "default", eye.bitmap.data) 
+			}
+			if (color_feet !== -1) {
+				front_feet.bitmap.data = setColor(color_feet, "grayscale", front_feet.bitmap.data)
+				front_feet.bitmap.data = setColor(color_feet, "default", front_feet.bitmap.data)
+
+				back_feet.bitmap.data = setColor(color_feet, "grayscale", front_feet.bitmap.data)
+				back_feet.bitmap.data = setColor(color_feet, "default", front_feet.bitmap.data)
+			}
+
+
+			39,18;
+			-73,18;
+			// let color = new Color(234, 140, 169);
+			newImage.blit({src: shadow_feet, x: 8*2, y: 32*2})
+			// newImage.blit(shadow_feet, 8*2, 32*2);
+			newImage.blit({src: shadow_body, x: 2*16, y: 2*0});
+			newImage.blit({src: shadow_front_feet, x: 2*24, y: 2*32});
+			newImage.blit({src: back_feet, x: 2*8, y: 32*2});
+			newImage.blit({src: body, x: 2*16, y: 2*0});
+			newImage.blit({src: front_feet, x: 2*24, y: 2*32});
+
+			newImage.blit({src: eye.clone(), x: 39*2, y: 18*2});
+			newImage.flip({horizontal: true});
+
+			newImage.blit({src: eye.clone(), x: (96-73)*2, y: 18*2});
+				// newImage.flip(true, false);
+			newImage.flip({horizontal: true});
+
+			// newImage.scan(0, 0, newImage.bitmap.width, newImage.bitmap.height, function(x, y, idx) {
+			// 	// x, y is the position of this pixel on the image
+			// 	// idx is the position start position of this rgba tuple in the bitmap Buffer
+			// 	// this is the image
+			
+			// 	var r = this.bitmap.data[idx + 0];
+			// 	var g = this.bitmap.data[idx + 1];
+			// 	var b = this.bitmap.data[idx + 2];
+			// 	var a = this.bitmap.data[idx + 3];
+			// 	let pixel = defaultOp({r, g, b, a}, {r: 156, g: 156, b: 156, a: 255});
+			// 	// console.log(pixel)
+			// 	this.bitmap.data[idx + 0] = pixel.r;
+			// 	this.bitmap.data[idx + 1] = pixel.g;
+			// 	this.bitmap.data[idx + 2] = pixel.b;
+			// 	this.bitmap.data[idx + 3] = pixel.a;
+			// 	// this.bitmap.data[idx + 3] = 57;
+			
+			// 	// rgba values run from 0 - 255
+			// 	// e.g. this.bitmap.data[idx] = 0; // removes red from this pixel
+			//   });	
+			// 
+			// console.log(newImage.getBase64Async(Jimp.MIME_PNG))
+			console.log("!")
+			resolve (newImage.getBuffer(JimpMime.png));
+		} catch (e) {
+			console.error(e)
 		}
-		let shadow_feet = drawImage(skin, 192, 64, 64, 32, 8, 32, 64*2, 30*2); //back feet shadow
-		let shadow_body = drawImage(skin, 96, 0, 96, 96, 16, 0, 64*2, 64*2); //body shadow
-		let shadow_front_feet = drawImage(skin, 192, 64, 64, 32, 24, 32, 64*2, 30*2); //front feet shadow
-		let back_feet = drawImage(skin, 192, 32, 64, 32, 8, 32, 64*2, 30*2); //back feet
-		let body = drawImage(skin, 0, 0, 96, 96, 16, 0, 64*2, 64*2)
-		// .color([
-			// { apply: 'hue', params: [0] },
-			// { apply: 'saturate', params: [0] },
-			// { apply: 'lighten', params: [20] },
-			// { apply: '', params: [0] }
-		// ]); //body
-		
-		let front_feet = drawImage(skin, 192, 32, 64, 32, 24, 32, 64*2, 30*2); //front feet
-		let eye = drawImage(skin, 64, 96, 32, 32, 39, 18, 26*2, 26*2); //left eye
-
-		// let shadow_feet = img.clone().cropQuiet(192, 64, 64, 32)
-		// let shadow_body = img.clone().cropQuiet(96, 0, 96, 96); //body shadow
-		// let shadow_front_feet = img.clone().cropQuiet(192, 64, 64, 32); //front feet shadow
-		// let back_feet = img.clone().cropQuiet(192, 32, 64, 32); //back feet
-		// let body = img.clone().cropQuiet(0, 0, 96, 96); //body
-		// let front_feet = img.clone().cropQuiet(192, 32, 64, 32); //front feet
-		// let eye = img.clone().cropQuiet(64, 96, 32, 32); //left eye
-		
-		let newImage = new Jimp(192, 128);
-	// newImage.bitmap.data.forEach(a => {
-			// console.log(a)
-			// a += 57;
-		// })
-		if (color_body !== -1) {
-			body.bitmap.data = setColor(color_body, "grayscale", body.bitmap.data) 
-			body.bitmap.data = reorderBody(body.bitmap.data)
-			body.bitmap.data = setColor(color_body, "default", body.bitmap.data) 
-
-			eye.bitmap.data = setColor(color_body, "grayscale", eye.bitmap.data) 
-	//		eye.bitmap.data = reorderBody(eye.bitmap.data)
-			eye.bitmap.data = setColor(color_body, "default", eye.bitmap.data) 
-		}
-		if (color_feet !== -1) {
-			front_feet.bitmap.data = setColor(color_feet, "grayscale", front_feet.bitmap.data)
-			front_feet.bitmap.data = setColor(color_feet, "default", front_feet.bitmap.data)
-
-			back_feet.bitmap.data = setColor(color_feet, "grayscale", front_feet.bitmap.data)
-			back_feet.bitmap.data = setColor(color_feet, "default", front_feet.bitmap.data)
-		}
-
-
-		39,18;
-		-73,18;
-		// let color = new Color(234, 140, 169);
-		newImage.blit(shadow_feet, 8*2, 32*2);
-		newImage.blit(shadow_body, 2*16, 2*0);
-		newImage.blit(shadow_front_feet, 2*24, 2*32);
-		newImage.blit(back_feet, 2*8, 32*2);
-		newImage.blit(body, 2*16, 2*0);
-		newImage.blit(front_feet, 2*24, 2*32);
-		
-		newImage.blit(eye.clone(), 39*2, 18*2);
-		newImage.flip(true, false);
-		
-		newImage.blit(eye.clone(), (96-73)*2, 18*2);
-		newImage.flip(true, false);
-
-		// newImage.scan(0, 0, newImage.bitmap.width, newImage.bitmap.height, function(x, y, idx) {
-		// 	// x, y is the position of this pixel on the image
-		// 	// idx is the position start position of this rgba tuple in the bitmap Buffer
-		// 	// this is the image
-		
-		// 	var r = this.bitmap.data[idx + 0];
-		// 	var g = this.bitmap.data[idx + 1];
-		// 	var b = this.bitmap.data[idx + 2];
-		// 	var a = this.bitmap.data[idx + 3];
-		// 	let pixel = defaultOp({r, g, b, a}, {r: 156, g: 156, b: 156, a: 255});
-		// 	// console.log(pixel)
-		// 	this.bitmap.data[idx + 0] = pixel.r;
-		// 	this.bitmap.data[idx + 1] = pixel.g;
-		// 	this.bitmap.data[idx + 2] = pixel.b;
-		// 	this.bitmap.data[idx + 3] = pixel.a;
-		// 	// this.bitmap.data[idx + 3] = 57;
-		
-		// 	// rgba values run from 0 - 255
-		// 	// e.g. this.bitmap.data[idx] = 0; // removes red from this pixel
-		//   });	
-		// 
-		// console.log(newImage.getBase64Async(Jimp.MIME_PNG))
-		resolve (newImage.getBufferAsync(Jimp.MIME_PNG));
 
 		// newImage.write('test1.png');
 	});
-})
+// })
 }
 
-let express = require('express')
 let app = express();
 
 app.get("/render/:skin/:color_body/:color_feet", async (req, res) => {
@@ -477,13 +496,9 @@ app.get("/render/:skin", async (req, res) => {
 	res.send(rendered);
 })
 
-let request = require('request');
-
-
-let bodyParser = require('body-parser')
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(bodyParser.raw());
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.raw());
 
 
 

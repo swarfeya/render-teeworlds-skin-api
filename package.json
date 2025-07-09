@@ -13,12 +13,9 @@
     "fastify-formbody": "^5.2.0",
     "fastify-static": "^4.6.1",
     "handlebars": "^4.7.7",
-    "jimp": "^0.16.1",
+    "jimp": "^1.6.0",
     "point-of-view": "^5.2.0",
     "request": "^2.88.2"
-  },
-  "engines": {
-    "node": "16.14.x"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/glitch-hello-node"
