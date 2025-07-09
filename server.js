@@ -342,16 +342,20 @@ function reorderBody(bitmap) {
 
 async function renderSkin(skin, color_body, color_feet) {
 	return new Promise((resolve, reject) => {
-	if (!require('fs').readdirSync('./skins').includes(skin + ".png"))
-		skin = 'default';
+	// if (!require('fs').readdirSync('./skins/06/').includes(skin + ".png"))
+	// 	skin = 'default';
 	if (color_body !== -1)
 		color_body = colorConvert(color_body, "code")
 	// color_feet = HSLToRGB(codeFormat(color_body)[0], codeFormat(color_body)[1], codeFormat(color_body)[2])
 	if (color_feet !== -1)
 		color_feet = colorConvert(color_feet, "code")
-	Jimp.read('./skins/' + skin + '.png', (err, skin) => {
-		if (err) return console.error(err);
-		
+	// Jimp.read("https://ddnet.org/skins/skin/community/" + skin + ".png")
+	// Jimp.
+	Jimp.read("https://ddnet.org/skins/skin/community/" + skin + ".png", async (err, skin) => {
+		if (err) {
+			// return console.error(err);
+			skin = await Jimp.read("./skins/default.png");
+		}
 		let shadow_feet = drawImage(skin, 192, 64, 64, 32, 8, 32, 64*2, 30*2); //back feet shadow
 		let shadow_body = drawImage(skin, 96, 0, 96, 96, 16, 0, 64*2, 64*2); //body shadow
 		let shadow_front_feet = drawImage(skin, 192, 64, 64, 32, 24, 32, 64*2, 30*2); //front feet shadow
