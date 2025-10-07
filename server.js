@@ -131,8 +131,8 @@ const isDigit = (str) => {
 	console.log(typeof str)
 	if (typeof str == "number") 
 		return true
-	// if (typeof str !== "string" )
-		// return false
+	if (typeof str !== "string" )
+		return false
 	console.log(str, "str")
 	for (char of str) {
 		if ('1234567890'.includes(char) == false) {
@@ -345,6 +345,7 @@ function reorderBody(bitmap) {
 
 
 async function renderSkin(skinname, color_body, color_feet) {
+	const [original_color_body, original_color_feet] = [color_body, color_feet];
 	return new Promise(async (resolve, reject) => {
 		console.log("!2")
 		
@@ -360,8 +361,8 @@ async function renderSkin(skinname, color_body, color_feet) {
 		console.log("!3")
 		// Jimp.read()
 		try {
-
-			let skin = await Jimp.read("https://ddnet.org/skins/skin/community/" + skinname + ".png");//, async (err, skin) => {
+			let skin = await Jimp.read("https://ddnet.org/skins/skin/community/" + skinname + ".png")
+			//, async (err, skin) => {
 			console.log("!4")
 			// if (err) {
 			// 	console.log("!5")
@@ -460,6 +461,9 @@ async function renderSkin(skinname, color_body, color_feet) {
 			resolve (newImage.getBuffer(JimpMime.png));
 		} catch (e) {
 			console.error(e)
+			console.log("something went wrong, falling back to default")
+			resolve(await renderSkin("default", original_color_body, original_color_feet));
+
 		}
 
 		// newImage.write('test1.png');
